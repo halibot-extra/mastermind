@@ -44,7 +44,7 @@ class MastermindModule(HalModule):
 			return
 		if not msg.body.startswith("#"):
 			return
-		s = self.state.get(msg.context.whom, None)
+		s = self.state.get(msg.origin, None)
 		if s and len(msg.body[1:]) == len(s.answer) and str.isdigit(msg.body[1:]):
 			self.handle_attempt(msg, msg.body[1:], s)
 
@@ -55,14 +55,14 @@ class MastermindModule(HalModule):
 		if len(string) == 1:
 			return
 		if string[1] == "start":
-			if self.state.get(msg.context.whom):
+			if self.state.get(msg.origin):
 				self.reply(msg, body="Game already started!")
 				return
 			args = self.parse_gameargs(string[2:])
 			if "channel" not in args:
-				args["channel"] = msg.context.whom
+				args["channel"] = msg.origin
 			else:
-				msg.context.whom = args["channel"]
+				msg.origin = args["channel"]
 				sby = " by {}!".format(msg.author)
 
 			try:
@@ -76,8 +76,8 @@ class MastermindModule(HalModule):
 				self.reply(msg, body="First up: {}".format(self.state[args["channel"]].users[0]))
 				
 		elif string[1] in ("stop", "end"):
-			if self.state.get(msg.context.whom):
-				self.end_game(msg, self.state.get(msg.context.whom))
+			if self.state.get(msg.origin):
+				self.end_game(msg, self.state.get(msg.origin))
 				return
 			self.reply(msg, body="Game not running...")
 			return
